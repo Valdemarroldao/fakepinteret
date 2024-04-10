@@ -1,0 +1,82 @@
+{% extends "homepage.html" %}
+
+{% block titulo %}
+Perfil - {{ usuario.username }}
+{% endblock %}
+
+{% block body %}
+<body>
+{% include "navbar.html" %}
+
+{% if form %}
+<div class="container">
+
+      <form class="bloco-add-img" method="POST" enctype="multipart/form-data">
+          {{ form.csrf_token }}
+        <h2>{{ usuario.username }} - Enviar foto</h2>
+
+          <div class="bloco-arquivo">
+            <label for="foto" class="botao-arquivo">
+              Escolher arquivo
+                {{ form.foto(class="input-arquivo", id="foto") }}
+            </label>
+                <span id="imagem-arquivo" class=""></span>
+          </div>
+
+          {{ form.botao_confirmacao(class="botao-login") }}
+      </form>
+    </div>
+{% else %}
+<div class="bloco-add-img">
+    <h2>{{ usuario.username }} - Ver Perfil</h2>
+</div>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div id="alert-message" class="alert alert-{{ category }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+    <script>
+      // Remove a mensagem após 5 segundos
+      setTimeout(function() {
+        var alertMessage = document.getElementById("alert-message");
+        alertMessage.style.display = "none";
+      }, 2000); // Tempo em milissegundos (2 segundos)
+    </script>
+  {% endif %}
+{% endwith %}
+
+
+<div class="conteudo">
+{% for foto in usuario.fotos %}
+    <form class="bloco-add-img" method="POST" enctype="multipart/form-data" action="{{ url_for('excluir_imagem', id_usuario=usuario.id) }}">
+        {{ form.csrf_token }}
+        <input type="hidden" name="nome_imagem" value="{{ foto.imagem }}">
+        <button type="submit" class="botao-excluir">Excluir Imagem</button>
+
+        <div class="bloco-imagem">
+            <img src="{{ url_for('static', filename='fotos_posts/' + foto.imagem) }}" />
+        </div>
+
+    </form>
+
+{% endfor %}
+
+</div>
+    <script>
+
+        let input = document.getElementById("foto");
+        let imagemArquivo = document.getElementById("imagem-arquivo");
+
+        input.addEventlistener("change", () => {
+            let inputImagem = document.querySelector("input[type=file]").files[0];
+
+            imagemArquivo.classlist.add("visivel");
+            imagemArquivo.innerText = inputImagem.name;
+        });
+     </script>
+</body>
+{% endblock %}
